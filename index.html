@@ -2,47 +2,78 @@
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>タップで色が変わる図形</title>
-    <!-- Tailwind CSSを読み込みます -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>タップで色替え - 5回勝負</title>
+    <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        /* ユーザーが誤ってテキストを選択してしまうのを防ぎます */
-        body {
+        html, body {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            position: fixed;
+            touch-action: none;
             user-select: none;
             -webkit-user-select: none;
             -moz-user-select: none;
             -ms-user-select: none;
-            /* iOSなどで長押しした際に表示されるメニューを無効化します */
             -webkit-touch-callout: none;
+            background-color: #f3f4f6;
         }
+
+        /* 画面比率（9:19.5）を維持しながら画面に合わせて拡大するコンテナ */
+        .iphone-container {
+            width: 100vw;
+            max-width: calc(100dvh * (9 / 19.5));
+            height: 100dvh;
+            max-height: calc(100vw * (19.5 / 9));
+            aspect-ratio: 9 / 19.5;
+            padding-top: max(env(safe-area-inset-top), 1.25rem);
+            padding-bottom: max(env(safe-area-inset-bottom), 1.25rem);
+            padding-left: max(env(safe-area-inset-left), 1rem);
+            padding-right: max(env(safe-area-inset-right), 1rem);
+        }
+
+        /* カプセル（アスペクト比2.4:1）画面拡大に応じて縦横比を崩さず比例拡大 */
         .shape {
-            /* 色の変化が滑らかに見えるようにアニメーションを設定します */
-            transition: background-color 0.2s ease-in-out, border-color 0.2s ease-in-out;
+            width: 82%;
+            aspect-ratio: 2.4 / 1;
+            box-sizing: border-box;
+            transition: background-color 0.2s ease-in-out, border-color 0.2s ease-in-out, transform 0.1s ease;
+        }
+        
+        .shape:active {
+            transform: scale(0.97);
         }
     </style>
 </head>
-<!-- 'relative' クラスを追加して、子の絶対配置の基準にします。'min-h-screen'で縦長表示に対応 -->
-<body class="bg-gray-100 flex items-center justify-center min-h-screen relative">
+<body class="flex items-center justify-center relative">
 
-    <!-- リセットボタンを右上に配置します -->
-    <button id="reset-btn" class="absolute top-4 right-4 px-4 py-2 text-sm bg-indigo-500 text-white font-semibold rounded-lg shadow-md hover:bg-indigo-600 focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:ring-opacity-75 z-10">
-        リセット
-    </button>
-
-    <!-- 画面サイズに応じてパディングを調整 (p-4 sm:p-8) -->
-    <div class="flex flex-col items-center p-4 sm:p-8 bg-white rounded-2xl shadow-lg text-center mx-4">
-        <h1 class="text-lg sm:text-xl font-semibold text-gray-800">タップで色を変えよう</h1>
-        <!-- 説明文を修正しました -->
-        <p class="text-sm sm:text-base text-gray-500 mb-4 sm:mb-6">左をおすと青色　右をおすと黄色</p>
+    <div class="iphone-container flex flex-col justify-between items-center relative z-0">
         
-        <!-- 図形を角丸の長方形に変更しました -->
-        <div id="shape-container" class="flex flex-col items-center space-y-1 sm:space-y-3">
-            <div class="shape w-32 h-14 sm:w-36 sm:h-16 rounded-full border-4 border-gray-400 bg-white cursor-pointer"></div>
-            <div class="shape w-32 h-14 sm:w-36 sm:h-16 rounded-full border-4 border-gray-400 bg-white cursor-pointer"></div>
-            <div class="shape w-32 h-14 sm:w-36 sm:h-16 rounded-full border-4 border-gray-400 bg-white cursor-pointer"></div>
-            <div class="shape w-32 h-14 sm:w-36 sm:h-16 rounded-full border-4 border-gray-400 bg-white cursor-pointer"></div>
-            <div class="shape w-32 h-14 sm:w-36 sm:h-16 rounded-full border-4 border-gray-400 bg-white cursor-pointer"></div>
+        <!-- ヘッダー＆リセットボタン領域 -->
+        <div class="w-full flex justify-between items-center pt-2 px-2">
+            <div class="text-left">
+                <h1 class="text-lg sm:text-2xl font-bold text-gray-800 leading-tight">タップで色替え</h1>
+                <p class="text-xs sm:text-sm text-gray-500 mt-0.5">左：青 / 右：黄色</p>
+            </div>
+            <button id="reset-btn" class="px-3.5 py-1.5 sm:px-4 sm:py-2 text-xs sm:text-sm bg-indigo-500 text-white font-semibold rounded-xl shadow-md hover:bg-indigo-600 active:scale-95 transition-all">
+                リセット
+            </button>
+        </div>
+
+        <!-- 5つのカプセルコンテナ（アスペクト比を維持して拡大） -->
+        <div id="shape-container" class="w-full flex-1 flex flex-col items-center justify-center space-y-3 sm:space-y-4 py-2">
+            <div class="shape rounded-full border-4 sm:border-[5px] border-gray-400 bg-white cursor-pointer shadow-sm"></div>
+            <div class="shape rounded-full border-4 sm:border-[5px] border-gray-400 bg-white cursor-pointer shadow-sm"></div>
+            <div class="shape rounded-full border-4 sm:border-[5px] border-gray-400 bg-white cursor-pointer shadow-sm"></div>
+            <div class="shape rounded-full border-4 sm:border-[5px] border-gray-400 bg-white cursor-pointer shadow-sm"></div>
+            <div class="shape rounded-full border-4 sm:border-[5px] border-gray-400 bg-white cursor-pointer shadow-sm"></div>
+        </div>
+
+        <!-- フッターインジケーター（装飾用） -->
+        <div class="w-full flex justify-center pb-1">
+            <div class="w-32 h-1 bg-gray-300 rounded-full"></div>
         </div>
     </div>
 
@@ -51,41 +82,49 @@
         const shapes = document.querySelectorAll('.shape');
         const resetButton = document.getElementById('reset-btn');
 
-        // クリック（タップ）の処理
-        const handleShapeClick = (e) => {
-            const shape = e.target;
+        // スワイプスクロールなどのブラウザデフォルト挙動を遮断
+        document.addEventListener('touchmove', (e) => {
+            e.preventDefault();
+        }, { passive: false });
 
-            // クリックされた要素が図形でない場合は何もしない
-            if (!shape.classList.contains('shape')) {
-                return;
-            }
-            
+        // カプセルタップ（左右判定）
+        const handleShapeClick = (e) => {
+            const shape = e.target.closest('.shape');
+            if (!shape) return;
+
             const rect = shape.getBoundingClientRect();
-            // タッチイベントとマウスイベントで座標の取得方法を統一
-            const clickX = e.clientX || (e.touches && e.touches[0].clientX);
+            
+            // タッチイベントまたはマウスイベントからクリック位置を取得
+            let clickX;
+            if (e.changedTouches && e.changedTouches.length > 0) {
+                clickX = e.changedTouches[0].clientX;
+            } else if (e.touches && e.touches.length > 0) {
+                clickX = e.touches[0].clientX;
+            } else {
+                clickX = e.clientX;
+            }
+
             const middleX = rect.left + rect.width / 2;
 
             if (clickX < middleX) {
-                // 左側をクリック -> 青色
-                shape.style.backgroundColor = '#60A5FA'; // Tailwindのblue-400
-                shape.style.borderColor = '#3B82F6';    // Tailwindのblue-500
+                // 左側を押した場合 -> 青色
+                shape.style.backgroundColor = '#60A5FA'; // blue-400
+                shape.style.borderColor = '#3B82F6';     // blue-500
             } else {
-                // 右側をクリック -> 黄色
-                shape.style.backgroundColor = '#FBBF24'; // Tailwindのyellow-400
-                shape.style.borderColor = '#F59E0B';    // Tailwindのyellow-500
+                // 右側を押した場合 -> 黄色
+                shape.style.backgroundColor = '#FBBF24'; // yellow-400
+                shape.style.borderColor = '#F59E0B';     // yellow-500
             }
         };
-        
-        // --- イベントリスナーの設定 ---
-        
-        // クリック（タップ）イベントのみに設定
+
+        // イベント登録（クリックとタッチ）
         container.addEventListener('click', handleShapeClick);
 
-        // リセットボタン（すべての図形を白に戻します）
+        // リセットボタンの初期化機能
         resetButton.addEventListener('click', () => {
             shapes.forEach(shape => {
                 shape.style.backgroundColor = 'white';
-                shape.style.borderColor = '#9CA3AF';
+                shape.style.borderColor = '#9CA3AF'; // gray-400
             });
         });
     </script>
