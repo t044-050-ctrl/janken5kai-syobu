@@ -13,8 +13,10 @@
         html, body {
             width: 100%;
             height: 100%;
-overflow: hidden;
+            margin: 0;
+            overflow: hidden;
             position: fixed;
+            inset: 0;
             touch-action: none;
             user-select: none;
             -webkit-user-select: none;
@@ -22,31 +24,64 @@ overflow: hidden;
             -ms-user-select: none;
             -webkit-touch-callout: none;
             background-color: #f3f4f6;
+            box-sizing: border-box;
         }
 
-        /* 画面比率（9:19.5）を維持しながら画面に合わせて拡大するコンテナ */
+        *, *::before, *::after {
+            box-sizing: border-box;
+        }
+
+        /* iPhoneの縦画面内で、比率を保ったまま正確に中央配置 */
         .iphone-container {
-            width: 100vw;
-            max-width: calc(100dvh * (9 / 19.5));
-            height: 100dvh;
-            max-height: calc(100vw * (19.5 / 9));
+            width: min(100vw, calc(100dvh * 9 / 19.5));
+            height: min(100dvh, calc(100vw * 19.5 / 9));
             aspect-ratio: 9 / 19.5;
-            padding-top: max(env(safe-area-inset-top), 1.25rem);
-            padding-bottom: max(env(safe-area-inset-bottom), 1.25rem);
-            padding-left: max(env(safe-area-inset-left), 1rem);
-            padding-right: max(env(safe-area-inset-right), 1rem);
+            padding-top: max(env(safe-area-inset-top), 12px);
+            padding-bottom: max(env(safe-area-inset-bottom), 12px);
+            padding-left: max(env(safe-area-inset-left), 12px);
+            padding-right: max(env(safe-area-inset-right), 12px);
+            margin-inline: auto;
+            overflow: hidden;
         }
 
-        /* カプセル（アスペクト比2.4:1）画面拡大に応じて縦横比を崩さず比例拡大 */
+        /* 見出しとリセットボタンの折り返し・押し合いを防ぐ */
+        .app-header {
+            width: 100%;
+            min-width: 0;
+            gap: 8px;
+        }
+
+        .app-heading {
+            min-width: 0;
+            white-space: nowrap;
+        }
+
+        #reset-btn {
+            flex: 0 0 auto;
+            white-space: nowrap;
+        }
+
+        /* カプセルは画面幅に対して中央に配置 */
         .shape {
             width: 82%;
             aspect-ratio: 2.4 / 1;
             box-sizing: border-box;
+            flex: 0 0 auto;
             transition: background-color 0.2s ease-in-out, border-color 0.2s ease-in-out, transform 0.1s ease;
         }
-        
+
         .shape:active {
             transform: scale(0.97);
+        }
+
+        @media (max-width: 380px) {
+            .app-heading h1 {
+                font-size: 1rem;
+            }
+            #reset-btn {
+                padding-left: 10px;
+                padding-right: 10px;
+            }
         }
     </style>
 </head>
@@ -55,8 +90,8 @@ overflow: hidden;
     <div class="iphone-container flex flex-col justify-between items-center relative z-0">
         
         <!-- ヘッダー＆リセットボタン領域 -->
-        <div class="w-full flex justify-between items-center pt-2 px-2">
-            <div class="text-left">
+        <div class="app-header flex justify-between items-center pt-2 px-2">
+            <div class="app-heading text-left">
                 <h1 class="text-lg sm:text-2xl font-bold text-gray-800 leading-tight">じゃんけん５回勝負</h1>
                 <p class="text-xs sm:text-sm text-gray-500 mt-0.5">左：青 / 右：黄色</p>
             </div>
